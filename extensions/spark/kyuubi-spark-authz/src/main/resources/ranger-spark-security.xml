@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<configuration>
+  <property>
+    <name>ranger.plugin.spark.service.name</name>
+    <value>dev_hive</value>
+    <description>
+      Name of the Ranger service containing policies for this SampleApp instance
+    </description>
+  </property>
+
+  <property>
+    <name>ranger.plugin.spark.policy.source.impl</name>
+    <value>org.apache.ranger.admin.client.RangerAdminRESTClient</value>
+  </property>
+
+  <property>
+    <name>ranger.plugin.spark.policy.rest.url</name>
+    <value>http://nodecs013.cib01.cib.dev.bo1.paas.cloudcenter.corp:30105/</value>
+  </property>
+
+  <property>
+    <name>ranger.plugin.spark.policy.cache.dir</name>
+    <value>/home/uappdevhybrid/</value>
+  </property>
+
+  <property>
+    <name>ranger.plugin.spark.authorize.in.single.call</name>
+    <value>true</value>
+    <description>Enable access checks in single call with all disallowed privileges thrown in exception. Default value is false.</description>
+  </property>
+
+  <property>
+    <name>ranger.plugin.spark.enable.implicit.userstore.enricher</name>
+    <value>true</value>
+    <description>Enable UserStoreEnricher for fetching user and group attributes if using macros or scripts in row-filters since Ranger 2.3</description>
+  </property>
+
+  <property>
+    <name>ranger.plugin.spark.policy.cache.dir</name>
+    <value>/home/uappdevhybrid/</value>
+    <description>As Authz plugin reuses hive service def, a policy cache path is required for caching UserStore and Tags for "hive" service def, while "ranger.plugin.spark.policy.cache.dir config" is the path for caching policies in service. </description>
+  </property>
+  <property>
+    <name>ranger.plugin.spark.forceNonKerberos</name>
+    <value>true</value>
+  </property>
+</configuration>

@@ -17,23 +17,22 @@
 
 package org.apache.kyuubi.plugin.spark.authz.util
 
-import java.nio.charset.StandardCharsets
-import java.security.{KeyFactory, PublicKey, Signature}
-import java.security.interfaces.ECPublicKey
-import java.security.spec.X509EncodedKeySpec
-import java.util.Base64
-
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.security.UserGroupInformation
-import org.apache.ranger.plugin.service.RangerBasePlugin
-import org.apache.spark.{SPARK_VERSION, SparkContext}
-import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, View}
-
 import org.apache.kyuubi.plugin.spark.authz.AccessControlException
 import org.apache.kyuubi.plugin.spark.authz.util.ReservedKeys._
 import org.apache.kyuubi.util.SemanticVersion
 import org.apache.kyuubi.util.reflect.DynConstructors
 import org.apache.kyuubi.util.reflect.ReflectUtils._
+import org.apache.ranger.plugin.service.RangerBasePlugin
+import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, View}
+import org.apache.spark.{SPARK_VERSION, SparkContext}
+
+import java.nio.charset.StandardCharsets
+import java.security.interfaces.ECPublicKey
+import java.security.spec.X509EncodedKeySpec
+import java.security.{KeyFactory, PublicKey, Signature}
+import java.util.Base64
 
 private[authz] object AuthZUtils {
 
@@ -46,9 +45,11 @@ private[authz] object AuthZUtils {
     val isSessionUserVerifyEnabled =
       spark.getConf.getBoolean(s"spark.$KYUUBI_SESSION_USER_SIGN_ENABLED", defaultValue = false)
 
+    val user = spark.getLocalProperty("user")
+
     // kyuubi.session.user is only used by kyuubi
-    val user = spark.getLocalProperty(KYUUBI_SESSION_USER)
     if (isSessionUserVerifyEnabled) {
+      val user = spark.getLocalProperty(KYUUBI_SESSION_USER)
       verifyKyuubiSessionUser(spark, user)
     }
 

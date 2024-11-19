@@ -17,15 +17,14 @@
 
 package org.apache.kyuubi.plugin.spark.authz.ranger
 
-import scala.collection.JavaConverters._
-import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
-
 import org.apache.hadoop.util.ShutdownHookManager
+import org.apache.kyuubi.plugin.spark.authz.AccessControlException
 import org.apache.ranger.plugin.policyengine.RangerAccessRequest
 import org.apache.ranger.plugin.service.RangerBasePlugin
 import org.slf4j.LoggerFactory
 
-import org.apache.kyuubi.plugin.spark.authz.AccessControlException
+import scala.collection.JavaConverters._
+import scala.collection.mutable.{ArrayBuffer, LinkedHashMap}
 
 object SparkRangerAdminPlugin extends RangerBasePlugin("spark", "sparkSql")
   with RangerConfigProvider {
@@ -146,6 +145,7 @@ object SparkRangerAdminPlugin extends RangerBasePlugin("spark", "sparkSql")
       auditHandler: SparkRangerAuditHandler): Unit = {
     if (requests.nonEmpty) {
       val results = SparkRangerAdminPlugin.isAccessAllowed(requests.asJava, auditHandler)
+      // auditHandler.flushAudit()
       if (results != null) {
         val indices = results.asScala.zipWithIndex.filter { case (result, idx) =>
           result != null && !result.getIsAllowed
@@ -161,12 +161,22 @@ object SparkRangerAdminPlugin extends RangerBasePlugin("spark", "sparkSql")
                 .append(resource)
               m
             })
+
+
           val errorMsg = accessTypeToResource
             .map { case (accessType, resources) =>
               s"[$accessType] ${resources.mkString("privilege on [", ",", "]")}"
             }.mkString(", ")
           throw new AccessControlException(
-            s"Permission denied: user [$user] does not have $errorMsg")
+            s"""
+               |+================================================================================================================================+|
+               ||SCIB SQL Authorization Failure                                                                                                   |
+               ||---------------------------------------------------------------------------------------------------------------------------------|
+               ||Permission denied: user [$user] does not have $errorMsg
+               ||---------------------------------------------------------------------------------------------------------------------------------|
+               ||SCIB SQL Authorization Failure                                                                                                   |
+               |+================================================================================================================================+|
+               """.stripMargin)
         }
       }
     }
