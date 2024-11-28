@@ -141,6 +141,44 @@ object SparkRangerAdminPlugin extends RangerBasePlugin("spark", "sparkSql")
    * for accessType and resources
    */
   def verify(
+              requests: Seq[RangerAccessRequest],
+              auditHandler: SparkRangerAuditHandler): Unit = {
+    if (requests.nonEmpty) {
+      val results = SparkRangerAdminPlugin.isAccessAllowed(requests.asJava, auditHandler)
+      if (results != null) {
+        val indices = results.asScala.zipWithIndex.filter { case (result, idx) =>
+          result != null && !result.getIsAllowed
+        }.map(_._2)
+        if (indices.nonEmpty) {
+          val user = requests.head.getUser
+          val accessTypeToResource =
+            indices.foldLeft(LinkedHashMap.empty[String, ArrayBuffer[String]])((m, idx) => {
+              val req = requests(idx)
+              val accessType = req.getAccessType
+              val resource = req.getResource.getAsString
+              m.getOrElseUpdate(accessType, ArrayBuffer.empty[String])
+                .append(resource)
+              m
+            })
+          val errorMsg = accessTypeToResource
+            .map { case (accessType, resources) =>
+              s"[$accessType] ${resources.mkString("privilege on [", ",", "]")}"
+            }.mkString(", ")
+          throw new AccessControlException(
+            s"""
+               |+================================================================================================================================+|
+               ||SCIB SQL Authorization Failure                                                                                                   |
+               ||---------------------------------------------------------------------------------------------------------------------------------|
+               ||Permission denied: user [$user] does not have $errorMsg
+               ||---------------------------------------------------------------------------------------------------------------------------------|
+               ||SCIB SQL Authorization Failure                                                                                                   |
+               |+================================================================================================================================+|
+               """.stripMargin)
+        }
+      }
+    }
+  }
+  /* def verify(
       requests: Seq[RangerAccessRequest],
       auditHandler: SparkRangerAuditHandler): Unit = {
     if (requests.nonEmpty) {
@@ -180,5 +218,5 @@ object SparkRangerAdminPlugin extends RangerBasePlugin("spark", "sparkSql")
         }
       }
     }
-  }
+  } */
 }

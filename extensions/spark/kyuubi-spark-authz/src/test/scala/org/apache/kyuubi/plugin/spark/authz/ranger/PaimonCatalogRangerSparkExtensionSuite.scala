@@ -78,7 +78,7 @@ class PaimonCatalogRangerSparkExtensionSuite extends RangerSparkExtensionSuite {
            |)
            |""".stripMargin
 
-      interceptEndsWith[AccessControlException] {
+      interceptContains[AccessControlException] {
         doAs(someone, sql(createTable))
       }(s"does not have [create] privilege on [$namespace1/$table1]")
       doAs(admin, createTable)
@@ -96,13 +96,13 @@ class PaimonCatalogRangerSparkExtensionSuite extends RangerSparkExtensionSuite {
 
         doAs(bob, sql(createTableSql(namespace1, tName)))
 
-        interceptEndsWith[AccessControlException] {
+        interceptContains[AccessControlException] {
           doAs(someone, sql(s"INSERT INTO $catalogV2.$namespace1.$tName VALUES (1, 'name_1')"))
         }(s"does not have [update] privilege on [$namespace1/$tName]")
         doAs(bob, sql(s"INSERT INTO $catalogV2.$namespace1.$tName VALUES (1, 'name_1')"))
         doAs(bob, sql(s"INSERT INTO $catalogV2.$namespace1.$tName VALUES (1, 'name_2')"))
 
-        interceptEndsWith[AccessControlException] {
+        interceptContains[AccessControlException] {
           doAs(someone, sql(s"SELECT id FROM $catalogV2.$namespace1.$tName").show())
         }(s"does not have [select] privilege on [$namespace1/$tName/id]")
         doAs(bob, sql(s"SELECT name FROM $catalogV2.$namespace1.$tName").show())

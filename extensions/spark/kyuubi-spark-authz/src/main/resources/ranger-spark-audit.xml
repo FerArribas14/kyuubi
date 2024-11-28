@@ -17,7 +17,7 @@
 --><?xml-stylesheet type="text/xsl" href="configuration.xsl"?><configuration xmlns:xi="http://www.w3.org/2001/XInclude">
   <property>
     <name>xasecure.audit.is.enabled</name>
-    <value>true</value>
+    <value>false</value>
   </property>
 
   <!-- HDFS audit provider configuration -->
@@ -237,7 +237,7 @@
   </property>
   <property>
     <name>xasecure.audit.destination.elasticsearch</name>
-    <value>true</value>
+    <value>false</value>
   </property>
   <property>
     <name>xasecure.audit.destination.elasticsearch.urls</name>

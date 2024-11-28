@@ -27,6 +27,7 @@ import org.apache.kyuubi.util.reflect.ReflectUtils._
 import org.apache.ranger.plugin.service.RangerBasePlugin
 import org.apache.spark.sql.catalyst.plans.logical.{LogicalPlan, View}
 import org.apache.spark.{SPARK_VERSION, SparkContext}
+import org.slf4j.LoggerFactory
 
 import java.nio.charset.StandardCharsets
 import java.security.interfaces.ECPublicKey
@@ -35,6 +36,8 @@ import java.security.{KeyFactory, PublicKey, Signature}
 import java.util.Base64
 
 private[authz] object AuthZUtils {
+
+  final private val LOG = LoggerFactory.getLogger(getClass)
 
   /**
    * Get the active session user
@@ -45,11 +48,10 @@ private[authz] object AuthZUtils {
     val isSessionUserVerifyEnabled =
       spark.getConf.getBoolean(s"spark.$KYUUBI_SESSION_USER_SIGN_ENABLED", defaultValue = false)
 
-    val user = spark.getLocalProperty("user")
+    val user = Option(spark.getLocalProperty("user")).filter(_.nonEmpty)
+      .getOrElse(spark.getLocalProperty(KYUUBI_SESSION_USER))
 
-    // kyuubi.session.user is only used by kyuubi
     if (isSessionUserVerifyEnabled) {
-      val user = spark.getLocalProperty(KYUUBI_SESSION_USER)
       verifyKyuubiSessionUser(spark, user)
     }
 
